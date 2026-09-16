@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: felix123
+      MYSQL_DATABASE: alumnos-api-felix
+    ports:
+      - "3307:3306"
+    networks:
+      - app-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", -h, "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password
+
+  backend:
+    build: ./Felix-Alumnos-Service
+    container_name: backend-container
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/alumnos-api-felix?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: felix123
+
+      # 🔧 SMTP CONFIG (mueve aquí)
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USERNAME: schoolservicestech@gmail.com
+      EMAIL_PASSWORD: ajomapfnqttdjpxb   # App Password de Gmail
+      EMAIL_FROM: schoolservicestech@gmail.com
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/ | grep -q '200\\|404\\|401' || exit 0"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  api-gateway:
+    build: ./Felix-API-GATEWAY
+    container_name: api-gateway-container
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    environment:
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: "http://backend-container:8081"
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: "Path=/api/**"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOWED-ORIGINS_0: "http://localhost:8082"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOWED-METHODS_0: "GET"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOWED-METHODS_1: "POST"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOWED-METHODS_2: "PUT"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOWED-METHODS_3: "DELETE"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOWED-METHODS_4: "OPTIONS"
+      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS_[/**]_ALLOW-CREDENTIALS: "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  frontend:
+    build: ./Felix-microSFrontend
+    container_name: frontend-container
+    ports:
+      - "8082:8082"
+    networks:
+      - app-network
+    environment:
+      REACT_APP_API_URL: "http://localhost:8080/api"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

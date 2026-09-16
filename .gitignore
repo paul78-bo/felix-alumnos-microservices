@@ -1,0 +1,74 @@
+# ==============================================
+# JAVA / MAVEN
+# ==============================================
+*.class
+*.jar
+!**/.mvn/wrapper/maven-wrapper.jar
+*.war
+*.ear
+target/
+build/
+bin/
+
+# ==============================================
+# SPRING BOOT - CONFIGURACIÓN SENSIBLE
+# ==============================================
+# Excluir application.yml (tiene credenciales reales)
+**/application.yml
+**/application.properties
+**/application-dev.yml
+**/application-prod.yml
+**/application-local.yml
+
+# Pero incluir los .example
+!**/application.yml.example
+!**/application.properties.example
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# ==============================================
+# LOGS
+# ==============================================
+*.log
+logs/
+backend_logs.txt
+
+# ==============================================
+# IDE - ECLIPSE / INTELLIJ / VSCODE
+# ==============================================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.settings/
+.project
+.classpath
+/.metadata/
+RemoteSystemsTempFiles/
+
+# ==============================================
+# SISTEMA OPERATIVO
+# ==============================================
+.DS_Store
+Thumbs.db
+
+# ==============================================
+# DOCKER Y TEMPORALES
+# ==============================================
+uploads/
+env_vars.txt
+env-vars.txt
+
+# ==============================================
+# BASE DE DATOS
+# ==============================================
+*.db
+*.sqlite
+# ==============================================
+# ARCHIVOS GENERADOS POR SPRING INITIALIZR
+# ==============================================
+HELP.md
