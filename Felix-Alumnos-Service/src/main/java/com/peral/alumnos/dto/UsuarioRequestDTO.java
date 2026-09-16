@@ -1,0 +1,58 @@
+package com.peral.alumnos.dto;
+
+import jakarta.validation.constraints.*;
+
+public class UsuarioRequestDTO {
+    
+    @NotBlank(message = "El username es obligatorio")
+    @Size(min = 3, max = 50, message = "El username debe tener entre 3 y 50 caracteres")
+    private String username;
+    
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "Debe ser un email válido")
+    private String email;
+    
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    private String password;
+    
+    @NotBlank(message = "El rol es obligatorio")
+    @Pattern(regexp = "ROLE_ADMIN|ROLE_PROFESOR|ROLE_ALUMNO", 
+             message = "Rol inválido. Valores permitidos: ROLE_ADMIN, ROLE_PROFESOR, ROLE_ALUMNO")
+    private String role;
+    
+    private Boolean enabled = true;
+    
+    // Campos para alumno (si role es ROLE_ALUMNO)
+    private String nombreAlumno;
+    private Integer edadAlumno;
+    private String carreraAlumno;
+    
+    // Constructores
+    public UsuarioRequestDTO() {}
+    
+    // Getters y Setters
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    
+    public Boolean getEnabled() { return enabled; }
+    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
+    
+    public String getNombreAlumno() { return nombreAlumno; }
+    public void setNombreAlumno(String nombreAlumno) { this.nombreAlumno = nombreAlumno; }
+    
+    public Integer getEdadAlumno() { return edadAlumno; }
+    public void setEdadAlumno(Integer edadAlumno) { this.edadAlumno = edadAlumno; }
+    
+    public String getCarreraAlumno() { return carreraAlumno; }
+    public void setCarreraAlumno(String carreraAlumno) { this.carreraAlumno = carreraAlumno; }
+}

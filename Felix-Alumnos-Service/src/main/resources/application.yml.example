@@ -1,0 +1,122 @@
+# ==============================================
+# CONFIGURACIÓN BASE
+# ==============================================
+# Copia este archivo como 'application.yml' 
+# y configura tus credenciales reales.
+# ==============================================
+
+spring:
+  application:
+    name: alumnos-service
+  profiles:
+    active: dev
+
+---
+# Perfil de desarrollo (localhost)
+spring:
+  config:
+    activate:
+      on-profile: dev
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USER_DEV:tu_email@gmail.com}
+    password: ${SMTP_PASSWORD_DEV:tu_app_password}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/alumnos-api-felix?useSSL=false&serverTimezone=UTC
+    username: ${DB_USER_DEV:root}
+    password: ${DB_PASSWORD_DEV:tu_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+app:
+  frontend-url: ${APP_FRONTEND_URL_DEV:http://localhost:8082}
+  backend-url: ${APP_BACKEND_URL_DEV:http://localhost:8081}
+  email-from: ${MAIL_FROM_DEV:tu_email@gmail.com}
+  reset-token-expiry-hours: 24
+
+jwt:
+  secret: ${JWT_SECRET_DEV:tu_clave_secreta_muy_larga_y_segura_aqui}
+  expiration: 1800000
+
+server:
+  port: 8081
+
+---
+# Perfil de producción
+spring:
+  config:
+    activate:
+      on-profile: prod
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USER}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/alumnos-api-felix?useSSL=false&serverTimezone=UTC
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+app:
+  frontend-url: ${APP_FRONTEND_URL}
+  backend-url: ${APP_BACKEND_URL}
+  email-from: ${MAIL_FROM}
+  reset-token-expiry-hours: 24
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 480000
+
+server:
+  port: 8081
+  address: 0.0.0.0
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/css,text/plain
+
+logging:
+  level:
+    com.peral.alumnos: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+  file:
+    path: ./logs
+    name: ${logging.file.path}/alumnos-service.log
+
+# ==============================================
+# SWAGGER / OPENAPI CONFIGURATION
+# ==============================================
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
+    try-it-out-enabled: false
+    operationsSorter: method
+  show-actuator: true
+  paths-to-match: /api/**

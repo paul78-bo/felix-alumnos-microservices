@@ -1,0 +1,40 @@
+package com.peral.alumnos.dto;
+
+public class LoginResponse {
+    private String token;
+    private String username;
+    private String role;
+    private String message;
+    
+    // Constructores
+    public LoginResponse() {}
+    
+    public LoginResponse(String token, String role, String username, String message) {
+        this.token = token;
+        this.role = role;
+        this.username = username;
+        this.message = message;
+    }
+
+    // ✅ AGREGAR ESTE CONSTRUCTOR
+    public LoginResponse(String token, String role, String username) {
+        this.token = token;
+        this.role = role;
+        this.username = username;
+    }
+    
+    
+    
+    // Getters y Setters
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
+    
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+}
