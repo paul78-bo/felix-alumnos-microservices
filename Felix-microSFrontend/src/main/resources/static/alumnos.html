@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Alumnos - Sistema Académico</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+.search-highlight {
+	background-color: #ffeb3b;
+	padding: 0 2px;
+	border-radius: 3px;
+}
+
+.table-responsive {
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.btn-group-sm .btn {
+	margin: 0 2px;
+}
+</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<div class="container">
+			<a class="navbar-brand" href="dashboard.html"> <i
+				class="fas fa-graduation-cap me-2"></i>Sistema Académico
+			</a>
+			<div class="navbar-nav ms-auto">
+				<span class="navbar-text me-3" id="userInfo"></span>
+				<button class="btn btn-outline-light btn-sm" onclick="logout()">
+					<i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+				</button>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container mt-4">
+		<!-- Alert Container para mensajes -->
+		<div id="alertContainer"></div>
+
+		<div class="card shadow">
+			<div class="card-header bg-primary text-white">
+				<div class="d-flex justify-content-between align-items-center">
+					<h4 class="mb-0">
+						<i class="fas fa-users me-2"></i>Gestión de Alumnos
+					</h4>
+					<div>
+						<button class="btn btn-outline-light btn-sm me-2"
+							onclick="window.location.href='dashboard.html'">
+							<i class="fas fa-tachometer-alt me-1"></i> Dashboard
+						</button>
+						<button class="btn btn-outline-light btn-sm"
+							onclick="window.location.href='tareas.html'">
+							<i class="fas fa-tasks me-1"></i> Tareas
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="card-body">
+				<!-- Barra de búsqueda y acciones -->
+				<div class="row mb-3">
+					<div class="col-md-6">
+						<!-- En alumnos.html, modifica el input de búsqueda -->
+						<div class="input-group">
+							<input type="text" class="form-control" id="buscarAlumno"
+								placeholder="Buscar por nombre, email, carrera o ID..."
+								onkeyup="alumnos.buscar(this.value)">
+							<button class="btn btn-outline-secondary" type="button"
+								onclick="alumnos.buscar(document.getElementById('buscarAlumno').value)">
+								<i class="fas fa-search"></i> Buscar
+							</button>
+							<button class="btn btn-outline-secondary" type="button"
+								onclick="alumnos.limpiarBusqueda()">
+								<i class="fas fa-times"></i> Limpiar
+							</button>
+						</div>
+					</div>
+					<div class="col-md-6 text-end" id="adminActions">
+						<button class="btn btn-success"
+							onclick="alumnos.mostrarFormulario()">
+							<i class="fas fa-plus me-1"></i> Nuevo Alumno
+						</button>
+					</div>
+				</div>
+
+				<!-- Tabla de alumnos -->
+				<div class="table-responsive">
+					<table class="table table-hover table-bordered">
+						<thead class="table-dark">
+							<tr>
+								<th>ID</th>
+								<th>Nombre</th>
+								<th>Email</th>
+								<th>Edad</th>
+								<th>Carrera</th>
+								<th id="accionesHeader">Acciones</th>
+							</tr>
+						</thead>
+						<tbody id="alumnosTable">
+							<tr>
+								<td colspan="6" class="text-center py-4">
+									<div class="spinner-border text-primary" role="status">
+										<span class="visually-hidden">Cargando...</span>
+									</div>
+									<p class="mt-2">Cargando alumnos...</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<!-- Después de la tabla -->
+					<div id="paginacion" class="mt-3"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal para formulario de alumno -->
+	<div class="modal fade" id="alumnoModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title">
+						<i class="fas fa-user-graduate me-2"></i> <span
+							id="modalTitleText">Nuevo Alumno</span>
+					</h5>
+					<button type="button" class="btn-close btn-close-white"
+						data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="alumnoForm">
+						<input type="hidden" id="alumnoId">
+						<div class="mb-3">
+							<label class="form-label">Nombre completo *</label> <input
+								type="text" class="form-control" id="alumnoNombre" required>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Email *</label> <input type="email"
+								class="form-control" id="alumnoEmail" required>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Edad *</label> <input type="number"
+								class="form-control" id="alumnoEdad" min="16" max="80" required>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Carrera *</label> <input type="text"
+								class="form-control" id="alumnoCarrera" required>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">
+						<i class="fas fa-times me-1"></i> Cancelar
+					</button>
+					<button type="button" class="btn btn-primary" id="btnGuardar"
+						onclick="alumnos.guardar()">
+						<i class="fas fa-save me-1"></i> Guardar
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="auth.js"></script>
+	<script src="alumnos.js"></script>
+	<script>
+		let currentUser = null;
+
+		function mostrarMenuUsuario() {
+			const userRole = sessionStorage.getItem('user_role');
+			const userNombre = sessionStorage.getItem('user_nombre')
+					|| 'Usuario';
+			const roleText = userRole === 'ROLE_ADMIN' ? 'Administrador'
+					: userRole === 'ROLE_PROFESOR' ? 'Profesor'
+							: userRole === 'ROLE_ALUMNO' ? 'Alumno' : 'Usuario';
+
+			const userInfo = document.getElementById('userInfo');
+			if (userInfo) {
+				userInfo.innerHTML = `<i class="fas fa-user-circle me-1"></i> ${userNombre} (${roleText})`;
+			}
+		}
+
+		function logout() {
+			localStorage.clear();
+			sessionStorage.clear();
+			window.location.href = 'login.html';
+		}
+
+		document.addEventListener('DOMContentLoaded', function() {
+			if (!auth.hasValidToken()) {
+				window.location.href = 'login.html';
+				return;
+			}
+
+			mostrarMenuUsuario();
+
+			if (typeof alumnos !== 'undefined' && alumnos.cargarAlumnos) {
+				alumnos.cargarAlumnos();
+			} else {
+				console.error('❌ Módulo de alumnos no cargado correctamente');
+			}
+		});
+	</script>
+</body>
+</html>

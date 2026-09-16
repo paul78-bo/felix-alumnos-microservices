@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entregar Tarea - Sistema Académico</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="fas fa-graduation-cap me-2"></i>Sistema Académico
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div id="userMenu">
+                    <span class="navbar-text me-3" id="userInfo"></span>
+                    <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-upload me-2"></i> Entregar Tarea
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="entregaForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Título de la entrega:</label>
+                                <input type="text" class="form-control" id="titulo" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Descripción (opcional):</label>
+                                <textarea class="form-control" id="descripcion" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Archivo (PDF):</label>
+                                <input type="file" class="form-control" id="archivo" accept=".pdf" required>
+                                <div class="form-text">Máximo 10MB, solo PDF</div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='tareas.html'">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="entregarTarea()">
+                            <i class="fas fa-upload me-1"></i> Entregar Tarea
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const tareaId = urlParams.get('id');
+        
+        // ✅ Verificación de sesión al inicio
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!auth.hasValidToken()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const sesionValida = await auth.verificarSesionInicial();
+            if (!sesionValida) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            mostrarMenuUsuario();
+            console.log('Tarea ID a entregar:', tareaId);
+            
+            // ✅ Opcional: Cargar datos de la tarea actual
+            await cargarTareaActual();
+        });
+        
+        // ✅ Función para cargar la tarea actual y mostrar título
+        async function cargarTareaActual() {
+            if (!tareaId) return;
+            
+            const token = auth.getToken();
+            try {
+                const response = await fetch(`http://localhost:8080/api/tareas/${tareaId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const tarea = await response.json();
+                    document.getElementById('titulo').value = tarea.titulo;
+                    document.getElementById('descripcion').value = tarea.descripcion || '';
+                    console.log('📋 Tarea cargada:', tarea.titulo);
+                }
+            } catch (error) {
+                console.error('Error cargando tarea:', error);
+            }
+        }
+        
+        async function entregarTarea() {
+            const titulo = document.getElementById('titulo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const archivo = document.getElementById('archivo').files[0];
+            
+            if (!titulo || !archivo) {
+                alert('Complete todos los campos obligatorios');
+                return;
+            }
+            
+            // ✅ Validar nombre del archivo
+            if (archivo.name.length > 100) {
+                alert('❌ El nombre del archivo es demasiado largo. Máximo 100 caracteres.\n\n' +
+                      'Nombre actual tiene ' + archivo.name.length + ' caracteres.\n' +
+                      'Renombra el archivo con un nombre más corto.');
+                return;
+            }
+            
+            // ✅ Validar extensión
+            if (!archivo.name.toLowerCase().endsWith('.pdf')) {
+                alert('❌ Solo se permiten archivos PDF');
+                return;
+            }
+            
+            // ✅ Validar tamaño (10MB)
+            if (archivo.size > 10 * 1024 * 1024) {
+                alert('❌ El archivo es demasiado grande. Máximo 10MB.\n\n' +
+                      'Tamaño actual: ' + (archivo.size / 1024 / 1024).toFixed(2) + 'MB');
+                return;
+            }
+            
+            const token = auth.getToken();
+            if (!token) {
+                alert('Sesión expirada');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Obtener el ID del alumno desde el perfil
+            let alumnoId = null;
+            try {
+                const perfilRes = await fetch('http://localhost:8080/api/usuarios/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (perfilRes.ok) {
+                    const perfil = await perfilRes.json();
+                    console.log('Perfil:', perfil);
+                    if (perfil.alumno && perfil.alumno.id) {
+                        alumnoId = perfil.alumno.id;
+                    } else if (perfil.id) {
+                        const alumnosRes = await fetch(`http://localhost:8080/api/alumnos/usuario/${perfil.id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (alumnosRes.ok) {
+                            const alumnos = await alumnosRes.json();
+                            if (alumnos && alumnos.length > 0) {
+                                alumnoId = alumnos[0].id;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error obteniendo alumno ID:', error);
+            }
+            
+            if (!alumnoId) {
+                alert('No se pudo identificar al alumno. Inicie sesión nuevamente.');
+                return;
+            }
+            
+            console.log('Alumno ID:', alumnoId);
+            console.log('Tarea ID a actualizar:', tareaId);
+            
+            const formData = new FormData();
+            formData.append('titulo', titulo);
+            formData.append('descripcion', descripcion || '');
+            formData.append('alumnoId', alumnoId);
+            formData.append('archivo', archivo);
+            formData.append('tipoTarea', 'ENTREGA');
+            
+            try {
+                // ✅ CORREGIDO: Usar PUT con el ID de la tarea
+                const response = await fetch(`http://localhost:8080/api/tareas/${tareaId}/entregar`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                console.log('Status:', response.status);
+                
+                if (response.status === 200) {
+                    alert('✅ Tarea entregada correctamente');
+                    window.location.href = 'tareas.html';
+                } else {
+                    const error = await response.json();
+                    console.error('Error response:', error);
+                    alert('❌ Error: ' + (error.message || 'No se pudo entregar la tarea'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión: ' + error.message);
+            }
+        }
+        
+        function mostrarMenuUsuario() {
+            const userRole = sessionStorage.getItem('user_role');
+            const userNombre = sessionStorage.getItem('user_nombre') || 'Usuario';
+            const roleText = userRole === 'ROLE_ADMIN' ? 'Administrador' : 
+                            userRole === 'ROLE_PROFESOR' ? 'Profesor' : 
+                            userRole === 'ROLE_ALUMNO' ? 'Alumno' : 'Usuario';
+            
+            const userInfo = document.getElementById('userInfo');
+            if (userInfo) {
+                userInfo.innerHTML = `<i class="fas fa-user-circle me-1"></i> ${userNombre} (${roleText})`;
+            }
+        }
+        
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

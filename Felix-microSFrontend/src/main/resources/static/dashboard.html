@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Sistema Académico</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .dashboard-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    .welcome-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="fas fa-graduation-cap me-2"></i>Sistema Académico
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div id="userMenu">
+                    <span class="navbar-text me-3" id="userInfo"></span>
+                    <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Sección de bienvenida -->
+        <div class="welcome-section">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4">
+                        <i class="fas fa-school me-2"></i>Bienvenido, <span id="welcomeUsername">Usuario</span>
+                    </h1>
+                    <p class="lead mb-0" id="welcomeRole">Gestión Académica</p>
+                    <p class="mt-2">Administra tus alumnos, tareas y usuarios desde un solo lugar</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-chalkboard-teacher" style="font-size: 5rem;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de acceso rápido -->
+        <div class="row mb-4">
+            <!-- Tarjeta de Alumnos (solo Admin y Profesor) -->
+            <div class="col-md-4 mb-3" id="cardAlumnos">
+                <div class="card dashboard-card" onclick="window.location.href='alumnos.html'">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users card-icon text-primary"></i>
+                        <h5 class="card-title">Gestión de Alumnos</h5>
+                        <p class="card-text text-muted">Administrar información de alumnos, editar, eliminar y ver listado completo</p>
+                        <button class="btn btn-outline-primary mt-2">Acceder <i class="fas fa-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Tareas (todos, pero texto diferente para Alumno) -->
+            <div class="col-md-4 mb-3" id="cardTareas">
+                <div class="card dashboard-card" onclick="window.location.href='tareas.html'">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tasks card-icon text-success"></i>
+                        <h5 class="card-title" id="tareasTitle">Gestión de Tareas</h5>
+                        <p class="card-text text-muted" id="tareasText">Revisar tareas subidas, calificar y dar seguimiento académico</p>
+                        <button class="btn btn-outline-success mt-2" id="tareasBtn">Acceder <i class="fas fa-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Usuarios (solo Admin) -->
+            <div class="col-md-4 mb-3" id="cardUsuarios">
+                <div class="card dashboard-card" onclick="window.location.href='usuarios.html'">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-cog card-icon text-warning"></i>
+                        <h5 class="card-title">Gestión de Usuarios</h5>
+                        <p class="card-text text-muted">Crear, editar y administrar roles de usuarios del sistema</p>
+                        <button class="btn btn-outline-warning mt-2">Acceder <i class="fas fa-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Mi Perfil (todos los usuarios) -->
+            <div class="col-md-4 mb-3" id="cardPerfil">
+                <div class="card dashboard-card" onclick="window.location.href='perfil.html'">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-circle card-icon text-info"></i>
+                        <h5 class="card-title">Mi Perfil</h5>
+                        <p class="card-text text-muted">Ver y editar mi información personal</p>
+                        <button class="btn btn-outline-info mt-2">Ver Perfil <i class="fas fa-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      
+    </div>
+
+       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Al inicio de cada página (dashboard.html, tareas.html, etc.)
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificación síncrona rápida
+            if (!auth.hasValidToken()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Verificación asíncrona con backend
+            const sesionValida = await auth.verificarSesionInicial();
+            if (!sesionValida) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Mostrar información del usuario
+            const userInfo = auth.getUserInfo();
+            const username = userInfo.username || 'Usuario';
+            const roleRaw = sessionStorage.getItem('user_role');
+            const role = auth.getRolAmigable ? auth.getRolAmigable() : (roleRaw === 'ROLE_ADMIN' ? 'Administrador' : roleRaw === 'ROLE_PROFESOR' ? 'Profesor' : roleRaw === 'ROLE_ALUMNO' ? 'Alumno' : 'Usuario');
+            
+            document.getElementById('welcomeUsername').textContent = username;
+            
+            // Mostrar badge del rol
+            const welcomeRole = document.getElementById('welcomeRole');
+            if (welcomeRole) {
+                const badgeColor = roleRaw === 'ROLE_ADMIN' ? 'danger' : roleRaw === 'ROLE_PROFESOR' ? 'warning' : 'success';
+                welcomeRole.innerHTML = `<span class="badge bg-${badgeColor}">${role}</span>`;
+            }
+            
+            // CONFIGURAR VISIBILIDAD DE MÓDULOS SEGÚN ROL
+            const userRole = sessionStorage.getItem('user_role');
+            const esAdmin = userRole === 'ROLE_ADMIN';
+            const esProfesor = userRole === 'ROLE_PROFESOR';
+            const esAlumno = userRole === 'ROLE_ALUMNO';
+            
+            // Gestión de Alumnos: solo Admin y Profesor
+            const cardAlumnos = document.getElementById('cardAlumnos');
+            if (cardAlumnos) {
+                cardAlumnos.style.display = (esAdmin || esProfesor) ? 'block' : 'none';
+            }
+            
+            // Gestión de Usuarios: solo Admin
+            const cardUsuarios = document.getElementById('cardUsuarios');
+            if (cardUsuarios) {
+                cardUsuarios.style.display = esAdmin ? 'block' : 'none';
+            }
+            
+            // Tareas: todos ven, pero con texto diferente para Alumno
+            const cardTareas = document.getElementById('cardTareas');
+            if (cardTareas && esAlumno) {
+                const title = cardTareas.querySelector('.card-title');
+                const text = cardTareas.querySelector('.card-text');
+                const btn = cardTareas.querySelector('button');
+                if (title) title.textContent = 'Mis Tareas';
+                if (text) text.textContent = 'Ver mis tareas asignadas y calificaciones';
+                if (btn) btn.textContent = 'Ver Mis Tareas';
+            }
+            
+            // Estadísticas: solo Admin (opcional)
+            if (esAdmin) {
+                cargarEstadisticas();
+            }
+        });
+        
+        async function cargarEstadisticas() {
+            const token = auth.getToken();
+            if (!token) return;
+            
+            try {
+                const statsSection = document.getElementById('statsSection');
+                if (statsSection) statsSection.style.display = 'flex';
+                // Aquí puedes llamar a tus endpoints de estadísticas
+            } catch (error) {
+                console.log('No se pudieron cargar estadísticas:', error);
+            }
+        }
+        
+        // ✅ No es necesario definir logout aquí, ya existe en auth.js
+        // window.logout ya está definido globalmente en auth.js
+    </script>
+</body>
+</html>
