@@ -1,21 +1,3 @@
-¡Perfecto! 🎯 Vamos a dejar el repo profesional con:
-
-README.md profesional
-
-Topics en GitHub
-
-LICENSE
-
-docs/ con capturas y diagramas
-
-Colección Postman
-
-📝 README profesional
-Copia TODO este contenido y reemplaza el README.md actual:
-
-text
-=== INICIO DEL README ===
-
 # 🎓 Felix Alumnos Microservices
 
 Sistema de gestión académica construido con **arquitectura de microservicios** 
